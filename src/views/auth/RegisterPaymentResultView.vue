@@ -102,7 +102,7 @@ onMounted(async () => {
         </div>
         <h2 class="text-xl font-bold text-ink">No se pudo completar</h2>
         <p class="text-sm text-muted">{{ error }}</p>
-        <AppButton v-else class="w-full" show-arrow @click="router.push('/register')">
+        <AppButton class="w-full" show-arrow @click="router.push('/register')">
           Volver al registro
         </AppButton>
         <RouterLink to="/login" class="block text-sm font-semibold text-ink underline">

@@ -474,6 +474,7 @@ export async function handleBillingRequest(req, res) {
 
       const reference = `MP-${String(parkingLotId).slice(0, 8)}-${Date.now()}`
       const description = `${plan.name}${lotName ? ` — ${lotName}` : ''}`
+      const returnUrl = `${APP_URL}/premium/pago-resultado`
 
       const { error: insertErr } = await db.from('subscriptions').insert({
         parking_lot_id: parkingLotId,
@@ -496,6 +497,7 @@ export async function handleBillingRequest(req, res) {
           reference,
           license: parkingLotId,
           description,
+          returnUrl,
         }),
       })
 

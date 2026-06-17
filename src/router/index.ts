@@ -5,6 +5,12 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      path: '/',
+      name: 'home',
+      component: () => import('@/views/marketing/HomeLandingView.vue'),
+      meta: { public: true },
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/auth/LoginView.vue'),
@@ -39,7 +45,6 @@ const router = createRouter({
       component: () => import('@/layouts/AdminLayout.vue'),
       meta: { requiresAuth: true },
       children: [
-        { path: '', redirect: '/dashboard' },
         {
           path: 'dashboard',
           name: 'dashboard',
@@ -62,6 +67,11 @@ const router = createRouter({
           name: 'aforo',
           component: () => import('@/views/admin/OccupancyView.vue'),
           meta: { roles: ['admin', 'operator'] },
+        },
+        {
+          path: 'cuenta',
+          name: 'cuenta',
+          component: () => import('@/views/admin/AccountView.vue'),
         },
         {
           path: 'configuracion',
@@ -89,9 +99,7 @@ const router = createRouter({
         },
         {
           path: 'premium',
-          name: 'premium',
-          component: () => import('@/views/admin/PremiumView.vue'),
-          meta: { roles: ['admin'] },
+          redirect: { name: 'cuenta' },
         },
         {
           path: 'premium/pago-resultado',
@@ -115,6 +123,7 @@ router.beforeEach(async (to) => {
   if (!auth.ready) await auth.init()
 
   if (to.meta.public) {
+    if (to.name === 'home' && auth.isAuthenticated) return '/dashboard'
     if (to.meta.guestOnly && auth.isAuthenticated) return '/dashboard'
     return true
   }

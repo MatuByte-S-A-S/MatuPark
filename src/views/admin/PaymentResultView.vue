@@ -80,8 +80,8 @@ onMounted(async () => {
           Estado: {{ status || 'desconocido' }}.
           Si ya pagaste, espera unos minutos o contacta soporte.
         </p>
-        <AppButton class="w-full" show-arrow @click="router.push('/premium')">
-          Volver a planes
+        <AppButton class="w-full" show-arrow @click="router.push('/cuenta')">
+          Ir a mi cuenta
         </AppButton>
       </div>
     </div>
