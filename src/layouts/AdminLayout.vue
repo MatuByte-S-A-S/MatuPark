@@ -4,6 +4,7 @@ import { useRoute, RouterLink } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useParkingStore } from '@/stores/parking'
 import { useAdminBootstrap } from '@/composables/useAdminBootstrap'
+import { useSubscriptionStore } from '@/stores/subscription'
 import NavIcon from '@/components/layout/NavIcon.vue'
 import CashHeaderWidget from '@/components/layout/CashHeaderWidget.vue'
 import OperationQueuePanel from '@/components/layout/OperationQueuePanel.vue'
@@ -15,6 +16,7 @@ import { APP_COMPANY, APP_NAME } from '@/constants/branding'
 
 const auth = useAuthStore()
 const parking = useParkingStore()
+const subscription = useSubscriptionStore()
 const route = useRoute()
 const { ready: adminReady, ensureReady, teardown, reset } = useAdminBootstrap()
 
@@ -28,6 +30,7 @@ const navItems = computed(() => {
     { to: '/aforo', label: 'Aforo', icon: 'parking', roles: ['admin', 'operator'] as const },
     { to: '/caja', label: 'Caja', icon: 'cash', roles: ['admin', 'operator'] as const },
     { to: '/reportes', label: 'Reportes', icon: 'chart', roles: ['admin'] as const },
+    { to: '/premium', label: 'Plan', icon: 'star', roles: ['admin'] as const },
     { to: '/configuracion', label: 'Ajustes', icon: 'settings', roles: ['admin'] as const },
     { to: '/usuarios', label: 'Usuarios', icon: 'users', roles: ['admin'] as const },
   ]
@@ -35,8 +38,16 @@ const navItems = computed(() => {
 })
 
 const pageTitle = computed(() => {
+  if (route.path.startsWith('/premium/pago-resultado')) return 'Resultado de pago'
+  if (route.path === '/premium') return 'Plan MatuPark'
   const item = navItems.value.find((i) => i.to === route.path)
   return item?.label ?? 'Panel'
+})
+
+const showSubscriptionBanner = computed(() => {
+  if (!auth.isAdmin || !subscription.current) return false
+  if (!subscription.isActive) return true
+  return subscription.daysLeft !== null && subscription.daysLeft <= 7
 })
 
 function isActive(path: string) {
@@ -45,6 +56,9 @@ function isActive(path: string) {
 
 onMounted(() => {
   void ensureReady()
+  if (auth.parkingLotId && auth.isAdmin) {
+    void subscription.load(auth.parkingLotId)
+  }
 })
 
 watch(
@@ -166,6 +180,19 @@ const initials = computed(() => {
       <p class="text-xs font-medium text-muted">
         {{ parking.lot?.name || 'Parqueadero' }} / {{ pageTitle }}
       </p>
+
+      <RouterLink
+        v-if="showSubscriptionBanner"
+        to="/premium"
+        class="mt-3 flex items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition hover:opacity-90"
+        :class="subscription.isActive ? 'bg-amber-50 text-amber-900 ring-1 ring-amber-200' : 'bg-red-50 text-red-800 ring-1 ring-red-200'"
+      >
+        <span>
+          {{ subscription.isActive ? `Tu plan vence en ${subscription.daysLeft} días` : 'Tu plan MatuPark venció' }}
+          — renueva para seguir operando
+        </span>
+        <span class="shrink-0 underline">Ver planes</span>
+      </RouterLink>
     </div>
 
     <main class="mx-auto w-full max-w-[1400px] flex-1 px-4 py-5 lg:px-8 lg:py-6">

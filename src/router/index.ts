@@ -17,6 +17,12 @@ const router = createRouter({
       meta: { public: true, guestOnly: true },
     },
     {
+      path: '/register/pago-resultado',
+      name: 'register-payment-result',
+      component: () => import('@/views/auth/RegisterPaymentResultView.vue'),
+      meta: { public: true, guestOnly: true },
+    },
+    {
       path: '/ticket/:code',
       name: 'public-ticket',
       component: () => import('@/views/public/TicketPublicView.vue'),
@@ -85,6 +91,12 @@ const router = createRouter({
           path: 'premium',
           name: 'premium',
           component: () => import('@/views/admin/PremiumView.vue'),
+          meta: { roles: ['admin'] },
+        },
+        {
+          path: 'premium/pago-resultado',
+          name: 'payment-result',
+          component: () => import('@/views/admin/PaymentResultView.vue'),
           meta: { roles: ['admin'] },
         },
       ],

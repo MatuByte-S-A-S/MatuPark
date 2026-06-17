@@ -157,5 +157,46 @@ CREATE TABLE IF NOT EXISTS reports (
 
 CREATE INDEX IF NOT EXISTS idx_reports_parking ON reports(parking_lot_id);
 
+-- ─── Suscripciones SaaS (PayMatuByte) ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  parking_lot_id UUID NOT NULL REFERENCES parking_lots(id) ON DELETE CASCADE,
+  plan_id VARCHAR(40) NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'expired', 'cancelled')),
+  payment_reference VARCHAR(120),
+  amount NUMERIC(12,2),
+  currency VARCHAR(3) NOT NULL DEFAULT 'COP',
+  link_id VARCHAR(120),
+  transaction_id VARCHAR(120),
+  starts_at TIMESTAMPTZ,
+  expires_at TIMESTAMPTZ,
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_subscriptions_parking ON subscriptions(parking_lot_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_payment_ref ON subscriptions(payment_reference);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(parking_lot_id, status);
+
+-- ─── Registro pendiente (pago antes de crear cuenta) ────────────────────────
+CREATE TABLE IF NOT EXISTS pending_signups (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email VARCHAR(255) NOT NULL,
+  full_name VARCHAR(200) NOT NULL,
+  password_enc TEXT NOT NULL,
+  plan_id VARCHAR(40) NOT NULL,
+  payment_reference VARCHAR(120) NOT NULL UNIQUE,
+  link_id VARCHAR(120),
+  status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'completed', 'cancelled')),
+  parking_lot_id UUID REFERENCES parking_lots(id) ON DELETE SET NULL,
+  user_id UUID,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_pending_signups_email ON pending_signups(email);
+CREATE INDEX IF NOT EXISTS idx_pending_signups_ref ON pending_signups(payment_reference);
+
 -- ─── Realtime (MatuDB) ────────────────────────────────────────────────────────
--- Habilita realtime en: tickets, payments, settings, cash_sessions, cash_movements
+-- Habilita realtime en: tickets, payments, settings, cash_sessions, cash_movements, subscriptions

@@ -47,6 +47,8 @@ const db = createClient({ url, projectId, apiKey })
 const migrations = [
   'database/migrations/002_cash.sql',
   'database/migrations/003_currency.sql',
+  'database/migrations/004_subscriptions.sql',
+  'database/migrations/005_pending_signups.sql',
 ]
 
 async function runSql(label, sql) {
@@ -68,7 +70,7 @@ async function runSql(label, sql) {
 }
 
 async function main() {
-  console.log('Migrando MatuDB (caja + moneda)…\n')
+  console.log('Migrando MatuDB (caja + moneda + suscripciones)…\n')
 
   for (const file of migrations) {
     const sql = readFileSync(join(root, file), 'utf8')
@@ -76,11 +78,11 @@ async function main() {
   }
 
   const { data, error } = await db.rpc(
-    "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('cash_sessions', 'cash_movements') ORDER BY table_name"
+    "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('cash_sessions', 'cash_movements', 'subscriptions', 'pending_signups') ORDER BY table_name"
   )
   if (error) throw error
   console.log('\nTablas OK:', (data ?? []).map((r) => r.table_name).join(', '))
-  console.log('\nRecuerda habilitar realtime en: cash_sessions, cash_movements')
+  console.log('\nRecuerda habilitar realtime en: cash_sessions, cash_movements, subscriptions')
 }
 
 main().catch((err) => {

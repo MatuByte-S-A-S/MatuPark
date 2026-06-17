@@ -158,6 +158,25 @@ export interface DashboardStats {
   todayVehicles: number
 }
 
+export type SubscriptionStatus = 'pending' | 'active' | 'expired' | 'cancelled'
+
+export interface Subscription {
+  id: string
+  parking_lot_id: string
+  plan_id: string
+  status: SubscriptionStatus
+  payment_reference: string | null
+  amount: number | null
+  currency: string
+  link_id: string | null
+  transaction_id: string | null
+  starts_at: string | null
+  expires_at: string | null
+  paid_at: string | null
+  created_at?: string
+  updated_at?: string
+}
+
 export interface OccupancyLevel {
   level: 'high' | 'medium' | 'low' | 'full'
   label: string
